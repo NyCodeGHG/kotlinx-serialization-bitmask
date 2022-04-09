@@ -6,7 +6,8 @@ import org.gradle.api.tasks.bundling.Jar
 
 fun MavenPom.configurePom(project: Project) {
     name.set(project.name)
-    description.set(project.description)
+    description.set(project.description
+        ?: "Generate kotlinx.serialization serializers for serializing booleans as bitmasks")
     url.set("https://github.com/NyCodeGHG/kotlinx-serialization-bitmask")
 
     licenses {
