@@ -3,6 +3,8 @@ plugins {
     signing
 }
 
+val extension = project.extensions.create("settings", SettingsExtension::class)
+
 publishing {
     repositories {
         val repo = if ("SNAPSHOT" in version.toString())
@@ -19,7 +21,9 @@ publishing {
 
     publications {
         withType<MavenPublication> {
-            javadocStub(project)
+            if (extension.stubJavadocJar.get()) {
+                javadocStub(project)
+            }
             pom {
                 configurePom(project)
             }
