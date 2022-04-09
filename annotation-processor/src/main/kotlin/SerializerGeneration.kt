@@ -5,6 +5,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import dev.nycode.kotlinx.serialization.bitmask.util.addImport
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -18,6 +19,14 @@ fun generateSerializer(classDeclaration: KSClassDeclaration): FileSpec {
     val className = classDeclaration.toClassName()
     val name = className.simpleName
     val serializer = className.peerClass("${name}Serializer")
+
+    if (classDeclaration.getAllProperties().any { it.type.toTypeName() != BOOLEAN }) {
+        error("fields in bitmask classes can only be of type Boolean.")
+    }
+
+    if (classDeclaration.getAllProperties().count() > 32) {
+        error("bitmask classes can only have up to 32 fields.")
+    }
 
     val descriptor = PropertySpec
         .builder(
@@ -51,7 +60,7 @@ fun generateSerializer(classDeclaration: KSClassDeclaration): FileSpec {
 
 private fun generateSerializeFunction(
     className: ClassName,
-    classDeclaration: KSClassDeclaration
+    classDeclaration: KSClassDeclaration,
 ) = FunSpec
     .builder("serialize")
     .addModifiers(KModifier.OVERRIDE)
@@ -84,7 +93,7 @@ private fun FunSpec.Builder.addOptInAnnotation(): FunSpec.Builder = addAnnotatio
 
 private fun generateDeserializeFunction(
     className: ClassName,
-    classDeclaration: KSClassDeclaration
+    classDeclaration: KSClassDeclaration,
 ) = FunSpec
     .builder("deserialize")
     .addModifiers(KModifier.OVERRIDE)
