@@ -2,6 +2,9 @@ name: CI
 on:
   push:
   pull_request:
+  release:
+    types:
+      - released
 
 jobs:
   validate:
@@ -28,3 +31,25 @@ jobs:
         uses: gradle/gradle-build-action@v2
       - name: Build with Gradle
         run: ./gradlew build
+
+  release:
+    name: Release
+    runs-on: ubuntu-20.04
+    needs: [ validate, build ]
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      - name: Publish with Gradle
+        run: ./gradlew publish
+        env:
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}

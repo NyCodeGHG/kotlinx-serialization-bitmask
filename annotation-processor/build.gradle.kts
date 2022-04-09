@@ -1,6 +1,7 @@
 plugins {
     `jvm-module`
     `ksp-module`
+    `bitmask-publishing`
 }
 
 dependencies {
@@ -17,8 +18,24 @@ dependencies {
     testImplementation("org.junit.jupiter", "junit-jupiter-params")
 }
 
+description = "kotlinx-serialization-bitmask annotation processor which generates the serializer."
+
 tasks {
     withType<Test> {
         useJUnitPlatform()
+    }
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["kotlin"])
+            artifact(sourcesJar)
+        }
     }
 }
