@@ -1,3 +1,3 @@
 # Multiplatform Example
 
-This example is currently not working because [ksp](https://github.com/google/ksp) can't generate common code.
+Example for using the processor in a Kotlin/Multiplatform project with Gradle.
